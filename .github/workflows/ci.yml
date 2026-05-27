@@ -1,0 +1,63 @@
+name: Note Taking API CI
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  test-and-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run automated test suites
+        run: npm run test:e2e
+
+      - name: Send email notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          secure: false
+          subject: GitHub Actions Result - Note Taking API
+          to: ${{ github.event.head_commit.author.email }}, srengty@gmail.com
+          from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
+          body: |
+            Dear Teacher,
+
+            The Note-Taking Application API automated test workflow has finished.
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Committer: ${{ github.actor }}
+            Workflow status: ${{ job.status }}
+
+            The project includes:
+            - User authentication
+            - Protected Note CRUD operations
+            - Folder organization
+            - Sharing status
+            - Search functionality
+            - Automated e2e tests
+            - GitHub Actions CI/CD email notification
+
+            This email was sent automatically by GitHub Actions after running the automated test suite.
+
+            Best regards,
+            Nut Sophaphirum
